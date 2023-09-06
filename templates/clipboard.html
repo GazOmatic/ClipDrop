@@ -13,19 +13,20 @@
     <form method="post" action="/">
         <label for="entryName">Name:</label><br>
         <input type="text" id="entryName" name="entry_name" placeholder="Optional name for the entry"><br><br>
-        
+
         <label for="clipboard">Content:</label><br>
         <textarea id="clipboard" name="content" rows="10" cols="30"></textarea><br>
         <button type="submit" name="save_server">Save to Server</button>
     </form>
-    
+    <button id="darkModeToggle">Toggle Dark Mode</button>
+
     <button id="clearClipboard">Clear Clipboard</button>
     <div id="clipboard-items">
         {% for content in contents %}
         <div class="clipboard-item">
             <h3>{{ content[0] }}</h3>
             <p id="copy_{{ loop.index }}">{{ content[1] }}</p>
-            
+
             <!-- Buttons container -->
             <div class="button-container">
                 <button onclick="copyToClipboard('copy_{{ loop.index }}')">Copy</button>
@@ -108,81 +109,152 @@
                 item.querySelector("p").id = "copy_" + (i + 2);
             }
         });
+        document.getElementById('darkModeToggle').addEventListener('click', function () {
+            const currentTheme = document.body.getAttribute('data-theme');
+            if (currentTheme === 'dark') {
+                document.body.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.body.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+        // Check local storage to apply user's chosen theme on page load
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            if (savedTheme === 'dark') {
+                document.body.setAttribute('data-theme', 'dark');
+            }
+        });
+
 
     </script>
 </body>
 <style>
     body {
-    font-family: Arial, sans-serif;
-    background-color: #f9f9f9;
-    padding: 10px;  /* Reduced padding for mobile */
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-form,
-#clipboard-items {
-    background-color: #fff;
-    border-radius: 5px;
-    padding: 15px 20px;  /* Adjusted padding for a better mobile look */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.clipboard-item {
-    border: 1px solid #e1e1e1;
-    margin-top: 20px;
-    padding: 15px;
-    border-radius: 5px;
-    position: relative;
-}
-
-button {
-    background-color: #007BFF;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 10px 20px;
-    cursor: pointer;
-    margin-top: 10px;
-    width: 100%;
-}
-
-#clearClipboard {
-    display: block;
-    margin: 20px 0;
-}
-
-h3 {
-    margin-top: 0;
-}
-
-/* Media query for screens larger than 600px */
-@media (min-width: 600px) {
-    body {
-        padding: 20px;  /* Increased padding for larger screens */
-    }
-    form {
-        display: block; /* Reset form layout */
+        font-family: Arial, sans-serif;
+        background-color: #f9f9f9;
+        padding: 10px;
+        /* Reduced padding for mobile */
+        max-width: 800px;
+        margin: 0 auto;
     }
 
-    #entryName,
-    #clipboard,
+    form,
+    #clipboard-items {
+        background-color: #fff;
+        border-radius: 5px;
+        padding: 15px 20px;
+        /* Adjusted padding for a better mobile look */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .clipboard-item {
+        border: 1px solid #e1e1e1;
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 5px;
+        position: relative;
+    }
+
     button {
-        width: 100%; /* Make them take full width */
-        margin-right: 0;
+        background-color: #007BFF;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        cursor: pointer;
+        margin-top: 10px;
+        width: 100%;
     }
-}
-.button-container {
-    display: flex;
-    justify-content: space-between;  /* Distribute the space between buttons */
-}
 
-.button-container button {
-    width: auto; /* Reset the button width */
-    flex: 1;  /* Allow the buttons to grow */
-    margin: 10px 5px; /* Space between buttons */
-}
+    #clearClipboard {
+        display: block;
+        margin: 20px 0;
+    }
 
+    h3 {
+        margin-top: 0;
+    }
+
+    /* Default light theme */
+    body {
+        --primary-bg-color: #f9f9f9;
+        --secondary-bg-color: #fff;
+        --primary-text-color: #333;
+        --secondary-text-color: #555;
+        --border-color: #e1e1e1;
+        --button-bg-color: #007BFF;
+        --button-text-color: white;
+    }
+
+    /* Dark theme overrides */
+    body[data-theme='dark'] {
+        --primary-bg-color: #121212;
+        --secondary-bg-color: #1f1f1f;
+        --primary-text-color: #ddd;
+        --secondary-text-color: #aaa;
+        --border-color: #333;
+        --button-bg-color: #3A8DFF;
+        --button-text-color: #ddd;
+    }
+
+    body {
+        background-color: var(--primary-bg-color);
+        color: var(--primary-text-color);
+    }
+
+    form,
+    #clipboard-items {
+        background-color: var(--secondary-bg-color);
+        color: var(--primary-text-color);
+    }
+
+    .clipboard-item {
+        border-color: var(--border-color);
+    }
+
+    button {
+        background-color: var(--button-bg-color);
+        color: var(--button-text-color);
+    }
+
+    /* Media query for screens larger than 600px */
+    @media (min-width: 600px) {
+        body {
+            padding: 20px;
+            /* Increased padding for larger screens */
+        }
+
+        form {
+            display: block;
+            /* Reset form layout */
+        }
+
+        #entryName,
+        #clipboard,
+        button {
+            width: 100%;
+            /* Make them take full width */
+            margin-right: 0;
+        }
+    }
+
+    .button-container {
+        display: flex;
+        justify-content: space-between;
+        /* Distribute the space between buttons */
+    }
+
+    .button-container button {
+        width: auto;
+        /* Reset the button width */
+        flex: 1;
+        /* Allow the buttons to grow */
+        margin: 10px 5px;
+        /* Space between buttons */
+    }
 </style>
 
 
