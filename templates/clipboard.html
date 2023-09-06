@@ -23,10 +23,14 @@
     <div id="clipboard-items">
         {% for content in contents %}
         <div class="clipboard-item">
-            <h3>{{ content[0] }}</h3>  <!-- Name/Title of the content -->
-            <p id="copy_{{ loop.index }}">{{ content[1] }}</p>  <!-- Actual content -->
-            <button onclick="copyToClipboard('copy_{{ loop.index }}')">Copy</button>
-            <button onclick="deleteClipboardItem({{ loop.index0 }})">Delete</button>
+            <h3>{{ content[0] }}</h3>
+            <p id="copy_{{ loop.index }}">{{ content[1] }}</p>
+            
+            <!-- Buttons container -->
+            <div class="button-container">
+                <button onclick="copyToClipboard('copy_{{ loop.index }}')">Copy</button>
+                <button onclick="deleteClipboardItem({{ loop.index0 }})">Delete</button>
+            </div>
         </div>
         {% endfor %}
     </div>
@@ -167,6 +171,16 @@ h3 {
         width: 100%; /* Make them take full width */
         margin-right: 0;
     }
+}
+.button-container {
+    display: flex;
+    justify-content: space-between;  /* Distribute the space between buttons */
+}
+
+.button-container button {
+    width: auto; /* Reset the button width */
+    flex: 1;  /* Allow the buttons to grow */
+    margin: 10px 5px; /* Space between buttons */
 }
 
 </style>
