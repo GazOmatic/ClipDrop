@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clipboard Web App</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+
+<body>
+
+    <form method="post" action="/">
+        <textarea id="clipboard" name="content" rows="10" cols="30"></textarea><br>
+        <button type="submit" name="save_server">Save to Server</button>
+        <button id="clearClipboard">Clear Clipboard</button>
+    </form>
+
+    <div id="clipboard-items">
+        {% for content in contents %}
+        <div class="clipboard-item">
+            <h3>Copy {{ loop.index }}</h3>
+            <p id="copy_{{ loop.index }}">{{ content }}</p>
+            <button onclick="copyToClipboard('copy_{{ loop.index }}')">Copy</button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        function copyToClipboard(elementId) {
+            var paragraph = document.getElementById(elementId);
+            var textArea = document.createElement("textarea");
+            textArea.value = paragraph.textContent;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textArea);
+        }
+
+        document.getElementById("clearClipboard").addEventListener("click", function () {
+            fetch('/clear-clipboard', { method: 'POST' }).then(function (response) {
+                if (response.ok) {
+                    // Successfully cleared clipboard on the server
+                    const clipboardItems = document.getElementById("clipboard-items");
+                    clipboardItems.innerHTML = '';  // Clear displayed clipboard items
+                } else {
+                    console.error("Failed to clear clipboard on server");
+                }
+            });
+        });
+        // Socket.io connection and setup
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+        socket.on('new_content', function (data) {
+            const clipboardItems = document.getElementById("clipboard-items");
+            const newIndex = clipboardItems.children.length + 1;
+
+            const newItem = document.createElement("div");
+            newItem.className = "clipboard-item";
+
+            const newHeading = document.createElement("h3");
+            newHeading.textContent = "Copy " + newIndex;
+            newItem.appendChild(newHeading);
+
+            const newParagraph = document.createElement("p");
+            newParagraph.id = "copy_" + newIndex;
+            newParagraph.textContent = data;
+            newItem.appendChild(newParagraph);
+
+            const newButton = document.createElement("button");
+            newButton.textContent = "Copy";
+            newButton.onclick = function () {
+                copyToClipboard(newParagraph.id);
+            };
+            newItem.appendChild(newButton);
+
+            clipboardItems.appendChild(newItem);
+        });
+    </script>
+</body>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f9f9f9;
+        padding: 20px;
+    }
+    
+    form, #clipboard-items {
+        background-color: #fff;
+        border-radius: 5px;
+        padding: 20px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .clipboard-item {
+        border: 1px solid #e1e1e1;
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 5px;
+        position: relative;
+    }
+
+    button {
+        background-color: #007BFF;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+    button:hover {
+        background-color: #0056b3;
+    }
+
+    #clearClipboard {
+        display: block;
+        margin: 20px 0;
+    }
+
+    h3 {
+        margin-top: 0;
+    }
+</style>
+
+</html>
